@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PharmaCare AI — Smart Pharmacy Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f3f7f1;--white:#ffffff;--border:#dde8d8;
+  --green:#1b5e38;--green2:#2e7d52;--green3:#52b788;--green-pale:#d8f3dc;
+  --amber:#b45309;--amber-pale:#fef3c7;
+  --red:#b91c1c;--red-pale:#fee2e2;
+  --blue:#1e40af;--blue-pale:#dbeafe;
+  --text:#0f1f0f;--muted:#537053;
+  --shadow:0 2px 12px rgba(27,94,56,.08);
+  --shadow-md:0 4px 24px rgba(27,94,56,.12);
+  --shadow-lg:0 8px 48px rgba(27,94,56,.16);
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+nav{background:var(--green);display:flex;align-items:center;padding:0 24px;height:60px;gap:3px;position:sticky;top:0;z-index:300;box-shadow:0 2px 24px rgba(0,0,0,.22);}
+.brand{font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-right:18px;white-space:nowrap;}
+.brand span{color:#95d5b2;}
+.ntab{background:none;border:none;color:rgba(255,255,255,.6);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 13px;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ntab:hover{background:rgba(255,255,255,.1);color:#fff;}
+.ntab.on{background:rgba(255,255,255,.18);color:#fff;font-weight:600;}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.bell-wrap{position:relative;}
+.bell-btn{background:rgba(255,255,255,.12);border:none;color:#fff;width:38px;height:38px;border-radius:9px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.bell-btn:hover{background:rgba(255,255,255,.2);}
+.bell-dot{position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;font-size:9px;padding:2px 5px;border-radius:99px;font-family:'JetBrains Mono',monospace;min-width:17px;text-align:center;}
+.user-pill{background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:99px;}
+
+.pg{display:none;padding:26px 30px;max-width:1400px;margin:0 auto;animation:fu .22s ease;}
+.pg.on{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+.sh{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;}
+.sh-title{font-family:'Playfair Display',serif;font-size:23px;}
+.sh-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+.sh-acts{display:flex;gap:10px;align-items:center;}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 19px;border-radius:10px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-g{background:var(--green);color:#fff;}
+.btn-g:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(27,94,56,.3);}
+.btn-gh{background:var(--white);color:var(--text);border:1.5px solid var(--border);}
+.btn-gh:hover{border-color:var(--green);color:var(--green);}
+.btn-r{background:var(--red-pale);color:var(--red);border:1px solid #fca5a5;}
+.btn-r:hover{background:var(--red);color:#fff;}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:7px;}
+.btn-xs{padding:3px 9px;font-size:11px;border-radius:6px;}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);}
+.card-hd{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-weight:700;font-size:14.5px;}
+.card-body{padding:18px 20px;}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:22px;}
+.sc{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s;}
+.sc:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.sc-icon{font-size:20px;margin-bottom:8px;}
+.sc-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-family:'JetBrains Mono',monospace;}
+.sc-val{font-family:'Playfair Display',serif;font-size:34px;line-height:1.1;margin:3px 0 5px;}
+.sc-sub{font-size:12px;color:var(--muted);}
+.sc.g .sc-val{color:var(--green);}
+.sc.a .sc-val{color:var(--amber);}
+.sc.r .sc-val{color:var(--red);}
+.sc.b .sc-val{color:var(--blue);}
+
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.tok{background:var(--green-pale);color:var(--green);}
+.twarn{background:var(--amber-pale);color:var(--amber);}
+.tdanger{background:var(--red-pale);color:var(--red);}
+.tblue{background:var(--blue-pale);color:var(--blue);}
+
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--bg);padding:9px 14px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-family:'JetBrains Mono',monospace;border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid #eef3eb;transition:background .1s;}
+tbody tr:hover{background:#f5fdf5;}
+tbody td{padding:11px 14px;vertical-align:middle;}
+tbody tr:last-child{border-bottom:none;}
+
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;}
+.fgf{grid-column:1/-1;}
+.fl{display:flex;flex-direction:column;gap:5px;}
+label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+input,select,textarea{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--text);background:var(--white);outline:none;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--green3);}
+textarea{resize:vertical;min-height:72px;}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:18px;width:100%;max-width:540px;box-shadow:var(--shadow-lg);animation:mi .2s ease;max-height:90vh;overflow-y:auto;}
+@keyframes mi{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.mhd{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.mtitle{font-family:'Playfair Display',serif;font-size:19px;}
+.mclose{background:var(--bg);border:none;width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.mclose:hover{background:var(--red-pale);color:var(--red);}
+.mbody{padding:20px 24px;}
+.mfoot{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);border-radius:9px;padding:8px 13px;}
+.search-bar:focus-within{border-color:var(--green3);}
+.search-bar input{border:none;outline:none;font-size:13px;flex:1;background:transparent;}
+
+.abox{border-radius:11px;padding:13px 16px;display:flex;align-items:flex-start;gap:11px;margin-bottom:9px;border:1px solid;}
+.abox.warn{background:var(--amber-pale);border-color:#fcd34d;color:var(--amber);}
+.abox.danger{background:var(--red-pale);border-color:#fca5a5;color:var(--red);}
+.abox.ok{background:var(--green-pale);border-color:#86efac;color:var(--green);}
+.abox.info{background:var(--blue-pale);border-color:#93c5fd;color:var(--blue);}
+.abox-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.abox-text{font-size:12.5px;line-height:1.6;}
+.abox-text strong{display:block;font-weight:700;margin-bottom:1px;}
+
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:18px;}
+.rstack{display:flex;flex-direction:column;gap:15px;}
+
+.prog-item{margin-bottom:12px;}
+.prog-lbl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;}
+.prog-bg{background:var(--bg);border-radius:99px;height:6px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:99px;transition:width .9s ease;}
+
+.tl{display:flex;flex-direction:column;gap:7px;}
+.tl-item{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:9px;border:1px solid;}
+.tl-item.danger{background:var(--red-pale);border-color:#fca5a5;}
+.tl-item.warn{background:var(--amber-pale);border-color:#fcd34d;}
+.tl-item.ok{background:var(--green-pale);border-color:#86efac;}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.tl-item.danger .tl-dot{background:var(--red);}
+.tl-item.warn .tl-dot{background:var(--amber);}
+.tl-item.ok .tl-dot{background:var(--green3);}
+.tl-name{font-size:12.5px;font-weight:600;flex:1;}
+.tl-days{font-family:'JetBrains Mono',monospace;font-size:11px;}
+.tl-item.danger .tl-days{color:var(--red);}
+.tl-item.warn .tl-days{color:var(--amber);}
+.tl-item.ok .tl-days{color:var(--green);}
+
+.loss-banner{background:linear-gradient(135deg,#7f1d1d,#b91c1c);color:#fff;border-radius:var(--r);padding:20px 24px;margin-bottom:22px;}
+.loss-title{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:3px;}
+.loss-sub{font-size:11.5px;opacity:.75;margin-bottom:14px;}
+.loss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.loss-item{background:rgba(255,255,255,.12);border-radius:9px;padding:13px;text-align:center;}
+.loss-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;}
+.loss-lbl{font-size:10.5px;opacity:.75;margin-top:2px;}
+
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:80px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;}
+.bar{width:100%;border-radius:4px 4px 0 0;cursor:pointer;min-height:4px;transition:filter .15s;}
+.bar:hover{filter:brightness(1.15);}
+.bar-lbl{font-size:9.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:4px;}
+
+.ai-panel{background:linear-gradient(135deg,#0a1f10 0%,#1b5e38 70%,#0d2e18 100%);border-radius:var(--r);padding:22px;color:#fff;margin-bottom:22px;}
+.ai-hd{display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+.ai-pulse{width:9px;height:9px;background:#95d5b2;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.45);opacity:.55}}
+.ai-lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;color:#95d5b2;text-transform:uppercase;}
+.ai-row{display:flex;gap:9px;}
+.ai-inp{flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.15);border-radius:9px;padding:10px 15px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;outline:none;transition:border-color .15s;}
+.ai-inp:focus{border-color:rgba(255,255,255,.38);}
+.ai-inp::placeholder{color:rgba(255,255,255,.38);}
+.ai-resp{margin-top:13px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:14px;font-size:13px;line-height:1.75;white-space:pre-wrap;display:none;color:rgba(255,255,255,.9);}
+.ai-resp.show{display:block;animation:fu .2s ease;}
+.ai-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;}
+.ai-chip{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.78);border-radius:99px;padding:5px 13px;font-size:11.5px;cursor:pointer;transition:all .15s;}
+.ai-chip:hover{background:rgba(255,255,255,.18);color:#fff;}
+
+.toast{position:fixed;bottom:26px;right:26px;padding:11px 18px;border-radius:11px;font-size:13px;font-weight:500;display:none;z-index:999;animation:fu .22s ease;max-width:300px;box-shadow:var(--shadow-lg);}
+.toast.show{display:block;}
+.toast.success{background:var(--green);color:#fff;}
+.toast.warning{background:var(--amber);color:#fff;}
+.toast.error{background:var(--red);color:#fff;}
+
+.empty{padding:44px;text-align:center;color:var(--muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.45;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+@media(max-width:860px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .fg,.fg3{grid-template-columns:1fr;}
+  .loss-grid{grid-template-columns:1fr;}
+  .pg{padding:14px;}
+  nav{padding:0 12px;}
+  .ntab{padding:6px 8px;font-size:11.5px;}
+}
+</style>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, setDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRbTPcjo4870qx4gs5uvsRIgsq_GtWaW0",
+      authDomain: "pharmacare-2b0f5.firebaseapp.com",
+      projectId: "pharmacare-2b0f5",
+      storageBucket: "pharmacare-2b0f5.firebasestorage.app",
+      messagingSenderId: "806079078036",
+      appId: "1:806079078036:web:555f5cc3c16788e4d09e81",
+      measurementId: "G-Z3NWW93TE6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ── FIREBASE HELPERS ──
+    window.fbSaveMed = async (med) => {
+      await setDoc(doc(db, 'medicines', String(med.id)), med);
+    };
+    window.fbDeleteMed = async (id) => {
+      await deleteDoc(doc(db, 'medicines', String(id)));
+    };
+    window.fbSaveSale = async (sale) => {
+      await setDoc(doc(db, 'sales', String(sale.id)), sale);
+    };
+    window.fbLoadAll = async () => {
+      const medsSnap  = await getDocs(collection(db, 'medicines'));
+      const salesSnap = await getDocs(collection(db, 'sales'));
+      return {
+        meds:  medsSnap.docs.map(d => d.data()),
+        sales: salesSnap.docs.map(d => d.data())
+      };
+    };
+    window.fbReady = true;
+    console.log('✓ Firebase connected — pharmacare-2b0f5');
+
+    // Auto-load on startup
+    window.addEventListener('load', async () => {
+      try {
+        const data = await window.fbLoadAll();
+        if(data.meds.length > 0) {
+          window.meds  = data.meds.sort((a,b) => a.id - b.id);
+          window.sales = data.sales.sort((a,b) => b.id - a.id);
+          if(window.meds.length)  window.nextId = Math.max(...window.meds.map(m=>m.id))  + 1;
+          if(window.sales.length) window.nsid   = Math.max(...window.sales.map(s=>s.id)) + 1;
+          window.renderDash && window.renderDash();
+          console.log('✓ Loaded from Firebase:', window.meds.length, 'medicines');
+        } else {
+          // First time — save default data to Firebase
+          for(const m of window.meds)  await window.fbSaveMed(m);
+          for(const s of window.sales) await window.fbSaveSale(s);
+          console.log('✓ Default data saved to Firebase');
+        }
+      } catch(e) {
+        console.warn('Firebase load error:', e);
+      }
+    });
+  </script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="brand">Pharma<span>Care</span> AI</div>
+  <button class="ntab on" onclick="goPage('dashboard',this)">📊 Dashboard</button>
+  <button class="ntab" onclick="goPage('inventory',this)">💊 Inventory</button>
+  <button class="ntab" onclick="goPage('alerts',this)">🚨 Alerts</button>
+  <button class="ntab" onclick="goPage('sales',this)">📈 Sales</button>
+  <button class="ntab" onclick="goPage('reports',this)">🖨 Reports</button>
+  <button class="ntab" onclick="goPage('ai',this)">✦ AI Assistant</button>
+  <div class="nav-r">
+    <div class="bell-wrap">
+      <button class="bell-btn" onclick="goPage('alerts',document.querySelectorAll('.ntab')[2])">🔔<span class="bell-dot" id="bell-n">0</span></button>
+    </div>
+    <div class="user-pill">👤 Messaoudi M. Anis — 78060</div>
+  </div>
+</nav>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="pg on" id="pg-dashboard">
+  <div class="sh">
+    <div><div class="sh-title">Good day, Messaoudi Mohamed Anis 👋</div><div class="sh-sub" id="today-lbl"></div></div>
+    <div class="sh-acts">
+      <button class="btn btn-gh" onclick="resetDemo()" title="Restore original demo data">↺ Reset Demo</button>
+      <button class="btn btn-g" onclick="openMod('mod-add')">＋ Add Medicine</button>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="sc g"><div class="sc-icon">💊</div><div class="sc-lbl">Total Medicines</div><div class="sc-val" id="s-total">0</div><div class="sc-sub">in stock</div></div>
+    <div class="sc r"><div class="sc-icon">⚠️</div><div class="sc-lbl">Expiring Soon</div><div class="sc-val" id="s-exp">0</div><div class="sc-sub">within 30 days</div></div>
+    <div class="sc a"><div class="sc-icon">📦</div><div class="sc-lbl">Low Stock</div><div class="sc-val" id="s-low">0</div><div class="sc-sub">below minimum</div></div>
+    <div class="sc b"><div class="sc-icon">💰</div><div class="sc-lbl">Stock Value</div><div class="sc-val" id="s-val">0</div><div class="sc-sub">DZD</div></div>
+  </div>
+  <div class="loss-banner">
+    <div class="loss-title">💸 Financial Loss Estimator — Expired & Near-Expired Stock</div>
+    <div class="loss-sub">Real-time calculation based on your current inventory</div>
+    <div class="loss-grid">
+      <div class="loss-item"><div class="loss-val" id="l-expired">0 DZD</div><div class="loss-lbl">Already Expired</div></div>
+      <div class="loss-item"><div class="loss-val" id="l-30">0 DZD</div><div class="loss-lbl">Expires in 30 Days</div></div>
+      <div class="loss-item"><div class="loss-val" id="l-total">0 DZD</div><div class="loss-lbl">Total at Risk</div></div>
+    </div>
+  </div>
+  <!-- CHIFA ROADMAP BANNER -->
+  <div style="background:linear-gradient(135deg,#1e40af,#1d4ed8);border-radius:14px;padding:16px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:20px;">
+    <div>
+      <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:4px;">🏥 CHIFA Integration — Roadmap Feature</div>
+      <div style="color:rgba(255,255,255,.8);font-size:12.5px;">Production version will integrate with Algeria's national CNAS/CHIFA insurance system for direct prescription reimbursement processing.</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center;">
+        <div style="color:#fff;font-weight:700;font-size:18px;">12,500</div>
+        <div style="color:rgba(255,255,255,.75);font-size:10px;">Algerian pharmacies</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center;">
+        <div style="color:#fff;font-weight:700;font-size:18px;">329B</div>
+        <div style="color:rgba(255,255,255,.75);font-size:10px;">DZD reimbursed/year</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center;">
+        <div style="color:#93c5fd;font-weight:700;font-size:18px;">v2.0</div>
+        <div style="color:rgba(255,255,255,.75);font-size:10px;">Planned release</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Inventory Overview</span><button class="btn btn-gh btn-sm" onclick="goPage('inventory',document.querySelectorAll('.ntab')[1])">View All →</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Medicine</th><th>Category</th><th>Qty</th><th>Expiry</th><th>Status</th></tr></thead><tbody id="dash-tbody"></tbody></table></div>
+    </div>
+    <div class="rstack">
+      <div class="card"><div class="card-hd"><span class="card-title">⏳ Expiry Timeline</span></div><div class="card-body" style="padding:12px 14px"><div class="tl" id="tl"></div></div></div>
+      <div class="card"><div class="card-hd"><span class="card-title">📈 Weekly Sales (DZD)</span></div><div class="card-body"><div class="bar-chart" id="bar-chart"></div></div></div>
+      <div class="card"><div class="card-hd"><span class="card-title">🗂 Stock by Category</span></div><div class="card-body" id="cat-prog"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INVENTORY ══ -->
+<div class="pg" id="pg-inventory">
+  <div class="sh">
+    <div><div class="sh-title">Medicine Inventory</div><div class="sh-sub">Manage all your pharmacy stock</div></div>
+    <div class="sh-acts">
+      <div class="search-bar" style="width:220px"><span>🔍</span><input type="text" id="inv-search" placeholder="Search..." oninput="renderInv()"/></div>
+      <select id="inv-fil" onchange="renderInv()" style="padding:9px 12px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;background:var(--white)">
+        <option value="all">All Status</option><option value="ok">✅ OK</option><option value="warn">⚠️ Expiring Soon</option><option value="expired">❌ Expired</option><option value="low">📦 Low Stock</option>
+      </select>
+      <button class="btn btn-g" onclick="openMod('mod-add')">＋ Add</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table><thead><tr><th>Name</th><th>Category</th><th>Stock</th><th>Min</th><th>Expiry</th><th>Days Left</th><th>Price DZD</th><th>Supplier</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="inv-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ALERTS ══ -->
+<div class="pg" id="pg-alerts">
+  <div class="sh"><div><div class="sh-title">Alerts & Notifications</div><div class="sh-sub">Items requiring immediate attention</div></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div><h3 style="font-size:13.5px;font-weight:700;margin-bottom:11px;color:var(--red)">❌ Expired Medicines</h3><div id="al-expired"></div></div>
+    <div><h3 style="font-size:13.5px;font-weight:700;margin-bottom:11px;color:var(--amber)">⚠️ Expiring Within 30 Days</h3><div id="al-warn"></div></div>
+    <div><h3 style="font-size:13.5px;font-weight:700;margin-bottom:11px;color:var(--blue)">📦 Low Stock Items</h3><div id="al-low"></div></div>
+    <div><h3 style="font-size:13.5px;font-weight:700;margin-bottom:11px;color:var(--green)">🔄 Reorder Suggestions</h3><div id="al-reorder"></div></div>
+  </div>
+</div>
+
+<!-- ══ SALES ══ -->
+<div class="pg" id="pg-sales">
+  <div class="sh">
+    <div><div class="sh-title">Sales Tracking</div><div class="sh-sub">Record sales and monitor revenue</div></div>
+    <div class="sh-acts"><button class="btn btn-g" onclick="openMod('mod-sale')">＋ Record Sale</button></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Sales History</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Medicine</th><th>Qty</th><th>Revenue (DZD)</th><th>Remaining</th></tr></thead><tbody id="sales-tbody"></tbody></table></div>
+    </div>
+    <div class="rstack">
+      <div class="card"><div class="card-hd"><span class="card-title">🏆 Top Selling</span></div><div class="card-body" id="top-sell"></div></div>
+      <div class="card"><div class="card-hd"><span class="card-title">💰 Revenue</span></div><div class="card-body" id="rev-sum"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REPORTS ══ -->
+<div class="pg" id="pg-reports">
+  <div class="sh">
+    <div><div class="sh-title">Reports & Export</div><div class="sh-sub">Full pharmacy reports</div></div>
+    <div class="sh-acts"><button class="btn btn-g" onclick="window.print()">🖨 Print Report</button></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div class="card"><div class="card-hd"><span class="card-title">📋 Expiry Report</span></div><div class="card-body" id="rep-exp"></div></div>
+    <div class="card"><div class="card-hd"><span class="card-title">📦 Reorder Report</span></div><div class="card-body" id="rep-reorder"></div></div>
+    <div class="card"><div class="card-hd"><span class="card-title">💰 Financial Summary</span></div><div class="card-body" id="rep-fin"></div></div>
+    <div class="card"><div class="card-hd"><span class="card-title">📊 Stock Overview</span></div><div class="card-body" id="rep-stock"></div></div>
+  </div>
+</div>
+
+<!-- ══ AI ASSISTANT ══ -->
+<div class="pg" id="pg-ai">
+  <div class="sh"><div><div class="sh-title">AI Assistant</div><div class="sh-sub">Ask anything about your pharmacy in plain English</div></div></div>
+  <div class="ai-panel">
+    <div class="ai-hd"><div class="ai-pulse"></div><div class="ai-lbl">PharmaCare Intelligence — AI Assistant</div><div style="font-size:10px;color:rgba(255,255,255,.4);font-family:'JetBrains Mono',monospace;margin-top:2px;">Developed by Messaoudi Mohamed Anis · Student 78060 · Vistula University 2026</div></div>
+    <div class="ai-row">
+      <input class="ai-inp" id="ai-inp" placeholder="e.g. What expires this month? What should I reorder? How much am I losing?" onkeydown="if(event.key==='Enter')askAI()"/>
+      <button class="btn btn-g" onclick="askAI()">✦ Ask</button>
+    </div>
+    <div class="ai-chips">
+      <div class="ai-chip" onclick="quickAsk('What medicines are expiring this month?')">📅 Expiring this month</div>
+      <div class="ai-chip" onclick="quickAsk('What should I reorder urgently and how much?')">🔄 What to reorder?</div>
+      <div class="ai-chip" onclick="quickAsk('How much money am I losing from expired and near-expired stock?')">💸 Financial loss</div>
+      <div class="ai-chip" onclick="quickAsk('What are my top selling medicines?')">🏆 Top sellers</div>
+      <div class="ai-chip" onclick="quickAsk('Give me a complete health summary of my pharmacy stock.')">📊 Full summary</div>
+    </div>
+    <div class="ai-resp" id="ai-resp"></div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title">💬 Conversation</span><button class="btn btn-gh btn-sm" onclick="clearChat()">Clear</button></div>
+    <div class="card-body" id="chat-hist" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:11px;"></div>
+  </div>
+</div>
+
+<!-- ══ ADD MODAL ══ -->
+<div class="overlay" id="mod-add" onclick="if(event.target===this)closeMod('mod-add')">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle">💊 Add New Medicine</div><button class="mclose" onclick="closeMod('mod-add')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fl fgf"><label>Medicine Name *</label><input type="text" id="f-name" placeholder="e.g. Doliprane 1000mg"/></div>
+        <div class="fl"><label>Category *</label>
+          <select id="f-cat"><option>Analgesics</option><option>Antibiotics</option><option>Antihistamines</option><option>Cardiovascular</option><option>Diabetes</option><option>Digestive</option><option>Respiratory</option><option>Vitamins & Supplements</option><option>Dermatology</option><option>Ophthalmology</option><option>Other</option></select>
+        </div>
+        <div class="fl"><label>Supplier</label><input type="text" id="f-sup" placeholder="e.g. Saidal, Pharmal"/></div>
+        <div class="fl"><label>Quantity in Stock *</label><input type="number" id="f-qty" placeholder="e.g. 50" min="0"/></div>
+        <div class="fl"><label>Minimum Stock Level</label><input type="number" id="f-min" placeholder="e.g. 10" min="0"/></div>
+        <div class="fl"><label>Expiry Date *</label><input type="date" id="f-exp"/></div>
+        <div class="fl"><label>Price per Unit (DZD) *</label><input type="number" id="f-price" placeholder="e.g. 350" min="0"/></div>
+        <div class="fl fgf"><label>Notes</label><textarea id="f-notes" placeholder="Storage conditions, special handling..."></textarea></div>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-gh" onclick="closeMod('mod-add')">Cancel</button>
+      <button class="btn btn-g" onclick="addMed()">＋ Add Medicine</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDIT MODAL ══ -->
+<div class="overlay" id="mod-edit" onclick="if(event.target===this)closeMod('mod-edit')">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle">✏️ Edit Medicine</div><button class="mclose" onclick="closeMod('mod-edit')">✕</button></div>
+    <div class="mbody">
+      <input type="hidden" id="ef-id"/>
+      <div class="fg">
+        <div class="fl fgf"><label>Name</label><input type="text" id="ef-name"/></div>
+        <div class="fl"><label>Category</label>
+          <select id="ef-cat"><option>Analgesics</option><option>Antibiotics</option><option>Antihistamines</option><option>Cardiovascular</option><option>Diabetes</option><option>Digestive</option><option>Respiratory</option><option>Vitamins & Supplements</option><option>Dermatology</option><option>Ophthalmology</option><option>Other</option></select>
+        </div>
+        <div class="fl"><label>Supplier</label><input type="text" id="ef-sup"/></div>
+        <div class="fl"><label>Quantity</label><input type="number" id="ef-qty" min="0"/></div>
+        <div class="fl"><label>Min Stock</label><input type="number" id="ef-min" min="0"/></div>
+        <div class="fl"><label>Expiry Date</label><input type="date" id="ef-exp"/></div>
+        <div class="fl"><label>Price (DZD)</label><input type="number" id="ef-price" min="0"/></div>
+        <div class="fl fgf"><label>Notes</label><textarea id="ef-notes"></textarea></div>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-gh" onclick="closeMod('mod-edit')">Cancel</button>
+      <button class="btn btn-g" onclick="saveEdit()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SALE MODAL ══ -->
+<div class="overlay" id="mod-sale" onclick="if(event.target===this)closeMod('mod-sale')">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle">📈 Record a Sale</div><button class="mclose" onclick="closeMod('mod-sale')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fl fgf"><label>Medicine</label><select id="sf-med"></select></div>
+        <div class="fl"><label>Quantity Sold</label><input type="number" id="sf-qty" placeholder="e.g. 5" min="1"/></div>
+        <div class="fl"><label>Date</label><input type="date" id="sf-date"/></div>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-gh" onclick="closeMod('mod-sale')">Cancel</button>
+      <button class="btn btn-g" onclick="recordSale()">✅ Record Sale</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- STUDENT FOOTER -->
+<footer style="background:var(--green);color:rgba(255,255,255,.75);padding:13px 30px;display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-top:40px;">
+  <div style="display:flex;align-items:center;gap:14px;">
+    <span style="font-family:'Playfair Display',serif;font-size:16px;color:#fff;font-weight:600;">Pharma<span style="color:#95d5b2;">Care</span> AI</span>
+    <span style="opacity:.35">|</span>
+    <span>AI-Powered Pharmacy Management System</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;">
+    <span>&#128104;&#8205;&#128187; <strong style="color:#fff;">Messaoudi Mohamed Anis</strong></span>
+    <span style="opacity:.35">|</span>
+    <span>Student ID: <strong style="color:#fff;">78060</strong></span>
+    <span style="opacity:.35">|</span>
+    <span>Vistula University &middot; Warsaw &middot; 2026</span>
+    <span style="opacity:.35">|</span>
+    <span>Web Systems Design &middot; Computer Engineering</span>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════
+// DATA
+// ══════════════════════════════
+let meds = [
+  {id:1,name:'Doliprane 1000mg',cat:'Analgesics',sup:'Saidal',qty:120,min:20,exp:'2026-07-15',price:180,notes:''},
+  {id:2,name:'Amoxicilline 500mg',cat:'Antibiotics',sup:'Pharmal',qty:45,min:15,exp:'2025-06-01',price:420,notes:'Keep refrigerated'},
+  {id:3,name:'Cetirizine 10mg',cat:'Antihistamines',sup:'Biopharm',qty:8,min:10,exp:'2027-03-20',price:250,notes:''},
+  {id:4,name:'Metformine 850mg',cat:'Diabetes',sup:'Saidal',qty:60,min:25,exp:'2025-05-20',price:310,notes:''},
+  {id:5,name:'Oméprazole 20mg',cat:'Digestive',sup:'Pharmal',qty:90,min:20,exp:'2026-12-10',price:195,notes:''},
+  {id:6,name:'Ventoline Spray',cat:'Respiratory',sup:'Biopharm',qty:12,min:5,exp:'2025-05-30',price:890,notes:''},
+  {id:7,name:'Vitamine C 500mg',cat:'Vitamins & Supplements',sup:'Local',qty:200,min:30,exp:'2027-08-01',price:95,notes:''},
+  {id:8,name:'Atorvastatine 40mg',cat:'Cardiovascular',sup:'Saidal',qty:5,min:10,exp:'2026-04-15',price:620,notes:''},
+  {id:9,name:'Ibuprofène 400mg',cat:'Analgesics',sup:'Pharmal',qty:30,min:20,exp:'2024-12-01',price:220,notes:'EXPIRED - do not sell'},
+  {id:10,name:'Azithromycine 500mg',cat:'Antibiotics',sup:'Biopharm',qty:30,min:10,exp:'2025-06-15',price:580,notes:''},
+  {id:11,name:'Paracétamol 500mg',cat:'Analgesics',sup:'Saidal',qty:3,min:15,exp:'2026-09-01',price:120,notes:''},
+  {id:12,name:'Amlodipine 5mg',cat:'Cardiovascular',sup:'Pharmal',qty:40,min:10,exp:'2027-01-10',price:340,notes:''},
+];
+let sales = [
+  {id:1,mid:1,mname:'Doliprane 1000mg',qty:10,price:180,date:'2026-05-10'},
+  {id:2,mid:5,mname:'Oméprazole 20mg',qty:5,price:195,date:'2026-05-11'},
+  {id:3,mid:7,mname:'Vitamine C 500mg',qty:20,price:95,date:'2026-05-12'},
+  {id:4,mid:2,mname:'Amoxicilline 500mg',qty:8,price:420,date:'2026-05-12'},
+  {id:5,mid:1,mname:'Doliprane 1000mg',qty:15,price:180,date:'2026-05-13'},
+  {id:6,mid:6,mname:'Ventoline Spray',qty:2,price:890,date:'2026-05-13'},
+];
+let chatHist = [];
+let nid = 13, nsid = 7;
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+// ══════════════════════════════
+// UTILS
+// ══════════════════════════════
+const days = d => { const x=new Date(d); x.setHours(0,0,0,0); return Math.round((x-TODAY)/86400000); };
+const status = d => { const n=days(d); return n<0?'expired':n<=30?'warn':'ok'; };
+const fmt = n => Number(n).toLocaleString('fr-DZ');
+const tag = (d,q,m) => {
+  const s=status(d), low=q<=m;
+  if(s==='expired') return '<span class="tag tdanger">❌ Expired</span>';
+  if(s==='warn') return '<span class="tag twarn">⚠️ Expiring</span>';
+  if(low) return '<span class="tag tblue">📦 Low Stock</span>';
+  return '<span class="tag tok">✅ OK</span>';
+};
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+type;
+  setTimeout(()=>t.className='toast',2700);
+}
+function openMod(id){
+  if(id==='mod-sale'){
+    document.getElementById('sf-med').innerHTML=meds.filter(m=>m.qty>0).map(m=>`<option value="${m.id}">${m.name} (${m.qty} left)</option>`).join('');
+    document.getElementById('sf-date').value=TODAY.toISOString().slice(0,10);
+  }
+  document.getElementById(id).classList.add('open');
+}
+function closeMod(id){document.getElementById(id).classList.remove('open');}
+
+// ══════════════════════════════
+// NAVIGATION
+// ══════════════════════════════
+function goPage(name, btn){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+name).classList.add('on');
+  if(btn) btn.classList.add('on');
+  if(name==='dashboard') renderDash();
+  else if(name==='inventory') renderInv();
+  else if(name==='alerts') renderAlerts();
+  else if(name==='sales') renderSales();
+  else if(name==='reports') renderReports();
+}
+
+// ══════════════════════════════
+// DASHBOARD
+// ══════════════════════════════
+function renderDash(){
+  const expired = meds.filter(m=>days(m.exp)<0);
+  const expiring = meds.filter(m=>{const d=days(m.exp);return d>=0&&d<=30;});
+  const low = meds.filter(m=>m.qty<=m.min);
+  const totalVal = meds.reduce((s,m)=>s+m.qty*m.price,0);
+  const lossExp = expired.reduce((s,m)=>s+m.qty*m.price,0);
+  const loss30 = expiring.reduce((s,m)=>s+m.qty*m.price,0);
+
+  document.getElementById('s-total').textContent = meds.length;
+  document.getElementById('s-exp').textContent = expiring.length;
+  document.getElementById('s-low').textContent = low.length;
+  document.getElementById('s-val').textContent = fmt(totalVal);
+  document.getElementById('l-expired').textContent = fmt(lossExp)+' DZD';
+  document.getElementById('l-30').textContent = fmt(loss30)+' DZD';
+  document.getElementById('l-total').textContent = fmt(lossExp+loss30)+' DZD';
+  document.getElementById('bell-n').textContent = expired.length+expiring.length+low.length;
+
+  // Dash table
+  const sorted = [...meds].sort((a,b)=>new Date(a.exp)-new Date(b.exp)).slice(0,7);
+  document.getElementById('dash-tbody').innerHTML = sorted.map(m=>`<tr>
+    <td><strong>${m.name}</strong></td>
+    <td><span style="font-size:11.5px;color:var(--muted)">${m.cat}</span></td>
+    <td style="font-weight:600;color:${m.qty<=m.min?'var(--red)':'inherit'}">${m.qty}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:11.5px">${m.exp}</td>
+    <td>${tag(m.exp,m.qty,m.min)}</td></tr>`).join('');
+
+  // Timeline
+  const tlMeds = [...meds].map(m=>({...m,d:days(m.exp)})).filter(m=>m.d<=60).sort((a,b)=>a.d-b.d).slice(0,6);
+  document.getElementById('tl').innerHTML = tlMeds.length ? tlMeds.map(m=>{
+    const cls=m.d<0?'danger':m.d<=30?'warn':'ok';
+    const lbl=m.d<0?`Expired ${Math.abs(m.d)}d ago`:m.d===0?'TODAY':m.d+'d left';
+    return `<div class="tl-item ${cls}"><div class="tl-dot"></div><div class="tl-name">${m.name}</div><div class="tl-days">${lbl}</div></div>`;
+  }).join('') : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No expiry alerts 🎉</div>';
+
+  // Bar chart
+  const vals=[4200,7800,3100,9500,6700,2400,5800];
+  const lbls=['M','T','W','T','F','S','S'];
+  const mx=Math.max(...vals);
+  document.getElementById('bar-chart').innerHTML=vals.map((v,i)=>`
+    <div class="bar-col">
+      <div class="bar" style="height:${Math.round(v/mx*100)}%;background:${i===3?'var(--green)':'var(--green3)'}" title="${lbls[i]}: ${fmt(v)} DZD"></div>
+      <div class="bar-lbl">${lbls[i]}</div>
+    </div>`).join('');
+
+  // Category progress
+  const cats=[...new Set(meds.map(m=>m.cat))];
+  const clrs=['#1b5e38','#2e7d52','#52b788','#95d5b2','#b7e4c7'];
+  document.getElementById('cat-prog').innerHTML=cats.slice(0,5).map((c,i)=>{
+    const cnt=meds.filter(m=>m.cat===c).length;
+    const pct=Math.round(cnt/meds.length*100);
+    return `<div class="prog-item">
+      <div class="prog-lbl"><span>${c}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted)">${cnt}</span></div>
+      <div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:${clrs[i%clrs.length]}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════
+// INVENTORY
+// ══════════════════════════════
+function renderInv(){
+  const q=(document.getElementById('inv-search')?.value||'').toLowerCase();
+  const f=document.getElementById('inv-fil')?.value||'all';
+  const list=meds.filter(m=>{
+    if(q&&!m.name.toLowerCase().includes(q)&&!m.cat.toLowerCase().includes(q))return false;
+    if(f==='ok') return status(m.exp)==='ok'&&m.qty>m.min;
+    if(f==='warn') return status(m.exp)==='warn';
+    if(f==='expired') return status(m.exp)==='expired';
+    if(f==='low') return m.qty<=m.min;
+    return true;
+  });
+  const tb=document.getElementById('inv-tbody');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="empty-icon">💊</div><div>No medicines found</div></div></td></tr>`;return;}
+  tb.innerHTML=list.map(m=>{
+    const d=days(m.exp);
+    const dl=d<0?`<span style="color:var(--red);font-weight:700">EXPIRED</span>`:d===0?`<span style="color:var(--red);font-weight:700">TODAY</span>`:`<span style="color:${d<=30?'var(--amber)':'var(--green)'}">${d}d</span>`;
+    return `<tr>
+      <td><strong>${m.name}</strong>${m.notes?`<br><span style="font-size:11px;color:var(--muted)">${m.notes}</span>`:''}</td>
+      <td><span style="font-size:11.5px;color:var(--muted)">${m.cat}</span></td>
+      <td><strong style="color:${m.qty<=m.min?'var(--red)':'inherit'}">${m.qty}</strong></td>
+      <td style="color:var(--muted)">${m.min}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11.5px">${m.exp}</td>
+      <td>${dl}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${fmt(m.price)}</td>
+      <td style="font-size:11.5px;color:var(--muted)">${m.sup||'—'}</td>
+      <td>${tag(m.exp,m.qty,m.min)}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-gh btn-xs" onclick="openEdit(${m.id})">✏️</button>
+        <button class="btn btn-r btn-xs" onclick="delMed(${m.id})">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════
+// ADD / EDIT / DELETE
+// ══════════════════════════════
+function addMed(){
+  const name=document.getElementById('f-name').value.trim();
+  const qty=parseInt(document.getElementById('f-qty').value)||0;
+  const exp=document.getElementById('f-exp').value;
+  const price=parseFloat(document.getElementById('f-price').value)||0;
+  if(!name||!exp){toast('Please fill required fields (*)', 'error');return;}
+  meds.push({id:nid++,name,cat:document.getElementById('f-cat').value,sup:document.getElementById('f-sup').value,qty,min:parseInt(document.getElementById('f-min').value)||0,exp,price,notes:document.getElementById('f-notes').value});
+  ['f-name','f-sup','f-qty','f-min','f-exp','f-price','f-notes'].forEach(i=>document.getElementById(i).value='');
+  const newMed = meds[0];
+  closeMod('mod-add'); saveData(); saveToFirebase('med', newMed); renderDash();
+  toast('✅ Medicine added successfully!');
+}
+function openEdit(id){
+  const m=meds.find(m=>m.id===id); if(!m)return;
+  document.getElementById('ef-id').value=m.id;
+  document.getElementById('ef-name').value=m.name;
+  document.getElementById('ef-cat').value=m.cat;
+  document.getElementById('ef-sup').value=m.sup||'';
+  document.getElementById('ef-qty').value=m.qty;
+  document.getElementById('ef-min').value=m.min;
+  document.getElementById('ef-exp').value=m.exp;
+  document.getElementById('ef-price').value=m.price;
+  document.getElementById('ef-notes').value=m.notes||'';
+  openMod('mod-edit');
+}
+function saveEdit(){
+  const id=parseInt(document.getElementById('ef-id').value);
+  const idx=meds.findIndex(m=>m.id===id); if(idx===-1)return;
+  meds[idx]={...meds[idx],name:document.getElementById('ef-name').value,cat:document.getElementById('ef-cat').value,sup:document.getElementById('ef-sup').value,qty:parseInt(document.getElementById('ef-qty').value)||0,min:parseInt(document.getElementById('ef-min').value)||0,exp:document.getElementById('ef-exp').value,price:parseFloat(document.getElementById('ef-price').value)||0,notes:document.getElementById('ef-notes').value};
+  closeMod('mod-edit'); saveData(); saveToFirebase('med', meds[idx]); renderInv(); renderDash();
+  toast('💾 Changes saved!');
+}
+function delMed(id){
+  if(!confirm('Delete this medicine from inventory?'))return;
+  meds=meds.filter(m=>m.id!==id);
+  saveData(); deleteFromFirebase(id); renderInv(); renderDash();
+  toast('🗑 Medicine deleted','warning');
+}
+
+// ══════════════════════════════
+// ALERTS
+// ══════════════════════════════
+function renderAlerts(){
+  const expired=meds.filter(m=>days(m.exp)<0);
+  const warn=meds.filter(m=>{const d=days(m.exp);return d>=0&&d<=30;});
+  const low=meds.filter(m=>m.qty<=m.min&&m.qty>0);
+  const reorder=meds.filter(m=>m.qty<m.min*2);
+
+  const ab=(m,type)=>{
+    const d=days(m.exp);
+    const info=type==='expired'?`Expired ${Math.abs(d)} days ago — Loss: ${fmt(m.qty*m.price)} DZD`:
+      type==='warn'?`${d} days left — Value at risk: ${fmt(m.qty*m.price)} DZD`:
+      type==='low'?`Stock: ${m.qty} / Min: ${m.min} — Need ${m.min*2-m.qty} more units`:
+      `Current: ${m.qty} — Suggest ordering: ${m.min*3} units from ${m.sup||'supplier'}`;
+    const cls=type==='expired'||type==='low'?'danger':type==='warn'?'warn':'info';
+    const ico=type==='expired'?'❌':type==='warn'?'⚠️':type==='low'?'📦':'🔄';
+    return `<div class="abox ${cls}"><div class="abox-icon">${ico}</div><div class="abox-text"><strong>${m.name}</strong>${info}</div></div>`;
+  };
+  const ok='<div class="abox ok"><div class="abox-icon">✅</div><div class="abox-text">All clear!</div></div>';
+  document.getElementById('al-expired').innerHTML=expired.length?expired.map(m=>ab(m,'expired')).join(''):ok;
+  document.getElementById('al-warn').innerHTML=warn.length?warn.map(m=>ab(m,'warn')).join(''):ok;
+  document.getElementById('al-low').innerHTML=low.length?low.map(m=>ab(m,'low')).join(''):ok;
+  document.getElementById('al-reorder').innerHTML=reorder.length?reorder.map(m=>ab(m,'reorder')).join(''):ok;
+}
+
+// ══════════════════════════════
+// SALES
+// ══════════════════════════════
+function recordSale(){
+  const mid=parseInt(document.getElementById('sf-med').value);
+  const qty=parseInt(document.getElementById('sf-qty').value)||0;
+  const date=document.getElementById('sf-date').value;
+  if(!qty){toast('Enter a valid quantity','error');return;}
+  const m=meds.find(m=>m.id===mid);
+  if(!m){toast('Medicine not found','error');return;}
+  if(qty>m.qty){toast(`Only ${m.qty} units in stock!`,'error');return;}
+  m.qty-=qty;
+  sales.unshift({id:nsid++,mid,mname:m.name,qty,price:m.price,date});
+  const newSale = sales[0];
+  closeMod('mod-sale'); saveData(); saveToFirebase('sale', newSale); renderSales(); renderDash();
+  toast(`✅ Sale recorded — ${qty} × ${m.name}`);
+}
+function renderSales(){
+  document.getElementById('sales-tbody').innerHTML=sales.map(s=>{
+    const m=meds.find(m=>m.id===s.mid);
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11.5px">${s.date}</td>
+      <td><strong>${s.mname}</strong></td>
+      <td>${s.qty}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--green)">${fmt(s.qty*s.price)} DZD</td>
+      <td style="color:${m&&m.qty<=m.min?'var(--red)':'var(--muted)'}">${m?m.qty:'—'}</td>
+    </tr>`;
+  }).join('');
+
+  const ms={};
+  sales.forEach(s=>{ms[s.mname]=(ms[s.mname]||0)+s.qty;});
+  const sorted=Object.entries(ms).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mx=sorted[0]?.[1]||1;
+  document.getElementById('top-sell').innerHTML=sorted.map(([n,q],i)=>`
+    <div class="prog-item"><div class="prog-lbl"><span>${i+1}. ${n}</span><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${q} sold</span></div>
+    <div class="prog-bg"><div class="prog-fill" style="width:${Math.round(q/mx*100)}%;background:var(--green2)"></div></div></div>`).join('');
+
+  const totalRev=sales.reduce((s,sa)=>s+sa.qty*sa.price,0);
+  document.getElementById('rev-sum').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:9px">
+      ${[['Total Revenue',fmt(totalRev)+' DZD','var(--green)'],['Transactions',sales.length,'var(--muted)'],['Units Sold',sales.reduce((s,sa)=>s+sa.qty,0),'var(--muted)']].map(([l,v,c])=>`
+      <div style="display:flex;justify-content:space-between;padding:10px 13px;background:var(--bg);border-radius:8px;">
+        <span style="font-size:13px;font-weight:600">${l}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:${c};font-weight:700">${v}</span>
+      </div>`).join('')}
+    </div>`;
+}
+
+// ══════════════════════════════
+// REPORTS
+// ══════════════════════════════
+function renderReports(){
+  const expired=meds.filter(m=>days(m.exp)<0);
+  const warn=meds.filter(m=>{const d=days(m.exp);return d>=0&&d<=30;});
+  const low=meds.filter(m=>m.qty<=m.min);
+  const totalVal=meds.reduce((s,m)=>s+m.qty*m.price,0);
+  const lossVal=expired.reduce((s,m)=>s+m.qty*m.price,0)+warn.reduce((s,m)=>s+m.qty*m.price,0);
+
+  const row=(m,col='var(--bg)')=>`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:${col};border-radius:8px;margin-bottom:5px;font-size:12.5px;">
+    <span><strong>${m.name}</strong> <span style="color:var(--muted);font-size:11px">(${m.cat})</span></span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11px">${m.exp}</span></div>`;
+
+  document.getElementById('rep-exp').innerHTML=
+    `<p style="font-size:11.5px;color:var(--muted);margin-bottom:9px">${expired.length} expired · ${warn.length} expiring soon</p>`+
+    (expired.length?`<p style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:5px">EXPIRED:</p>`+expired.map(m=>row(m,'var(--red-pale)')).join(''):'') +
+    (warn.length?`<p style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:5px;margin-top:8px">EXPIRING SOON:</p>`+warn.map(m=>row(m,'var(--amber-pale)')).join(''):'')||
+    '<p style="color:var(--green);font-size:13px;text-align:center;padding:20px">All medicines are fresh ✅</p>';
+
+  document.getElementById('rep-reorder').innerHTML=low.length?low.map(m=>`
+    <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--blue-pale);border-radius:8px;margin-bottom:5px;font-size:12.5px;">
+      <span><strong>${m.name}</strong></span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">Order ${m.min*2} units</span>
+    </div>`).join(''):
+    '<p style="color:var(--green);font-size:13px;text-align:center;padding:20px">No reorders needed ✅</p>';
+
+  document.getElementById('rep-fin').innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">
+    ${[['Total Stock Value',fmt(totalVal)+' DZD','var(--green)'],
+       ['At-Risk (exp/expiring)',fmt(lossVal)+' DZD','var(--red)'],
+       ['Safe Stock Value',fmt(Math.max(0,totalVal-lossVal))+' DZD','var(--blue)'],
+       ['Total Sales Revenue',fmt(sales.reduce((s,sa)=>s+sa.qty*sa.price,0))+' DZD','var(--green)']
+    ].map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;padding:10px 13px;background:var(--bg);border-radius:8px;">
+      <span style="font-size:13px;font-weight:600">${l}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:${c};font-weight:700">${v}</span>
+    </div>`).join('')}</div>`;
+
+  const cc={};meds.forEach(m=>cc[m.cat]=(cc[m.cat]||0)+1);
+  document.getElementById('rep-stock').innerHTML=`
+    <p style="font-size:11.5px;color:var(--muted);margin-bottom:9px">${meds.length} medicines · ${Object.keys(cc).length} categories</p>`+
+    Object.entries(cc).map(([c,n])=>`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:8px;margin-bottom:5px;font-size:12.5px;">
+      <span>${c}</span><span style="font-family:'JetBrains Mono',monospace;color:var(--muted)">${n}</span></div>`).join('');
+}
+
+// ══════════════════════════════
+// AI ASSISTANT
+// ══════════════════════════════
+function buildCtx(){
+  const expired=meds.filter(m=>days(m.exp)<0);
+  const warn=meds.filter(m=>{const d=days(m.exp);return d>=0&&d<=30;});
+  const low=meds.filter(m=>m.qty<=m.min);
+  const totalVal=meds.reduce((s,m)=>s+m.qty*m.price,0);
+  const lossVal=expired.reduce((s,m)=>s+m.qty*m.price,0)+warn.reduce((s,m)=>s+m.qty*m.price,0);
+  return `You are PharmaCare AI, assistant for an Algerian family pharmacy (operating since 1990).
+PHARMACY STATUS:
+- Total medicines: ${meds.length}
+- Expired: ${expired.length} (${expired.map(m=>m.name).join(', ')||'none'})
+- Expiring in 30 days: ${warn.length} (${warn.map(m=>m.name+' '+days(m.exp)+'d').join(', ')||'none'})
+- Low stock: ${low.length} (${low.map(m=>m.name+' qty='+m.qty+'/min='+m.min).join(', ')||'none'})
+- Total stock value: ${fmt(totalVal)} DZD
+- Money at risk: ${fmt(lossVal)} DZD
+- Today: ${TODAY.toISOString().slice(0,10)}
+
+FULL INVENTORY:
+${meds.map(m=>`${m.name} | qty:${m.qty} | min:${m.min} | exp:${m.exp} | price:${m.price}DZD | supplier:${m.sup}`).join('\n')}
+
+RECENT SALES:
+${sales.slice(0,8).map(s=>`${s.date}: ${s.mname} x${s.qty} = ${s.qty*s.price}DZD`).join('\n')}
+
+Be concise, practical and specific. Use bullet points. Answer in English.`;
+}
+
+const GEMINI_KEY = 'AIzaSyD2LMLXmbO8qqa3nRK_DLfBwWmXgexCnCU';
+
+function quickAsk(q){document.getElementById('ai-inp').value=q;askAI();}
+
+async function askAI(){
+  const inp=document.getElementById('ai-inp');
+  const q=inp.value.trim(); if(!q)return;
+  const resp=document.getElementById('ai-resp');
+  resp.className='ai-resp show';
+  resp.textContent='✦ Analyzing your pharmacy data...';
+
+  // Build full prompt with context + history
+  const ctx = buildCtx();
+  const historyText = chatHist.length > 0
+    ? chatHist.map(c => (c.role==='user'?'User: ':'Assistant: ') + c.content).join('\n') + '\n'
+    : '';
+  const fullPrompt = ctx + '\n\n' + historyText + 'User: ' + q;
+
+  try{
+    // Groq API — completely free, no quota, ultra fast
+    const GROQ_KEY = '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';
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_KEY
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 800,
+        temperature: 0.4,
+        messages: [
+          { role: 'system', content: buildCtx() },
+          ...chatHist.map(c=>({role:c.role, content:String(c.content||'')})),
+          { role: 'user', content: q }
+        ]
+      })
+    });
+
+    if(!r.ok){
+      const errText = await r.text();
+      console.error('Groq Error:', r.status, errText);
+      resp.textContent = 'Error ' + r.status + ': ' + errText;
+      return;
+    }
+
+    const data = await r.json();
+    console.log('Groq response:', data);
+    const raw = data.choices?.[0]?.message?.content || 'No response from AI.';
+    // Render markdown: bold, bullets, line breaks
+    const rendered = raw
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^\* (.+)/gm, '<li>$1</li>')
+      .replace(/^\d+\. (.+)/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>)/gs, '<ul style="margin:8px 0 8px 18px;padding:0">$1</ul>')
+      .replace(/\n\n/g, '</p><p style="margin:8px 0">')
+      .replace(/\n/g, '<br>');
+    resp.innerHTML = '<p style="margin:0">' + rendered + '</p>';
+    chatHist.push({role:'user',content:q},{role:'assistant',content:text});
+    renderChat();
+    inp.value='';
+  } catch(e){
+    console.error('Fetch error:', e);
+    resp.textContent = '⚠️ Network error: ' + e.message;
+  }
+}
+function renderChat(){
+  const el=document.getElementById('chat-hist');
+  el.innerHTML=chatHist.map(c=>`
+    <div style="display:flex;gap:9px;align-items:flex-start;flex-direction:${c.role==='user'?'row-reverse':'row'}">
+      <div style="width:30px;height:30px;border-radius:50%;background:${c.role==='user'?'var(--green)':'#0a1f10'};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">${c.role==='user'?'👤':'✦'}</div>
+      <div style="background:${c.role==='user'?'var(--green-pale)':'var(--bg)'};border:1px solid var(--border);border-radius:11px;padding:11px 14px;font-size:13px;line-height:1.65;max-width:80%;white-space:pre-wrap">${c.content}</div>
+    </div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function clearChat(){chatHist=[];document.getElementById('chat-hist').innerHTML='';document.getElementById('ai-resp').className='ai-resp';}
+
+// ══════════════════════════════
+// DEMO RESET FUNCTION
+// ══════════════════════════════
+const DEFAULT_MEDS = [
+  {id:1,name:'Doliprane 1000mg',cat:'Analgesics',sup:'Saidal',qty:120,min:20,exp:'2026-07-15',price:180,notes:''},
+  {id:2,name:'Amoxicilline 500mg',cat:'Antibiotics',sup:'Pharmal',qty:45,min:15,exp:'2025-06-01',price:420,notes:'Keep refrigerated'},
+  {id:3,name:'Cetirizine 10mg',cat:'Antihistamines',sup:'Biopharm',qty:8,min:10,exp:'2027-03-20',price:250,notes:''},
+  {id:4,name:'Metformine 850mg',cat:'Diabetes',sup:'Saidal',qty:60,min:25,exp:'2025-05-20',price:310,notes:''},
+  {id:5,name:'Oméprazole 20mg',cat:'Digestive',sup:'Pharmal',qty:90,min:20,exp:'2026-12-10',price:195,notes:''},
+  {id:6,name:'Ventoline Spray',cat:'Respiratory',sup:'Biopharm',qty:12,min:5,exp:'2025-05-30',price:890,notes:''},
+  {id:7,name:'Vitamine C 500mg',cat:'Vitamins & Supplements',sup:'Local',qty:200,min:30,exp:'2027-08-01',price:95,notes:''},
+  {id:8,name:'Atorvastatine 40mg',cat:'Cardiovascular',sup:'Saidal',qty:5,min:10,exp:'2026-04-15',price:620,notes:''},
+  {id:9,name:'Ibuprofène 400mg',cat:'Analgesics',sup:'Pharmal',qty:30,min:20,exp:'2024-12-01',price:220,notes:'EXPIRED - do not sell'},
+  {id:10,name:'Azithromycine 500mg',cat:'Antibiotics',sup:'Biopharm',qty:30,min:10,exp:'2025-06-15',price:580,notes:''},
+  {id:11,name:'Paracétamol 500mg',cat:'Analgesics',sup:'Saidal',qty:3,min:15,exp:'2026-09-01',price:120,notes:''},
+  {id:12,name:'Amlodipine 5mg',cat:'Cardiovascular',sup:'Pharmal',qty:40,min:10,exp:'2027-01-10',price:340,notes:''},
+];
+const DEFAULT_SALES = [
+  {id:1,mid:1,mname:'Doliprane 1000mg',qty:10,price:180,date:'2026-05-10'},
+  {id:2,mid:5,mname:'Oméprazole 20mg',qty:5,price:195,date:'2026-05-11'},
+  {id:3,mid:7,mname:'Vitamine C 500mg',qty:20,price:95,date:'2026-05-12'},
+  {id:4,mid:2,mname:'Amoxicilline 500mg',qty:8,price:420,date:'2026-05-12'},
+  {id:5,mid:1,mname:'Doliprane 1000mg',qty:15,price:180,date:'2026-05-13'},
+  {id:6,mid:6,mname:'Ventoline Spray',qty:2,price:890,date:'2026-05-13'},
+];
+function resetDemo(){
+  if(!confirm('Reset to original demo data? Your changes will be lost.')) return;
+  meds = JSON.parse(JSON.stringify(DEFAULT_MEDS));
+  sales = JSON.parse(JSON.stringify(DEFAULT_SALES));
+  nextId = 13; nsid = 7;
+  saveData();
+  // Reset Firebase too
+  (async () => {
+    try {
+      if(window.fbSaveMed) {
+        for(const m of meds)  await window.fbSaveMed(m);
+        for(const s of sales) await window.fbSaveSale(s);
+        console.log('Firebase reset done');
+      }
+    } catch(e) { console.warn('Firebase reset error:', e); }
+  })();
+  renderDash();
+  toast('↺ Demo data restored!', 'success');
+}
+
+// ══════════════════════════════
+// LOCALSTORAGE PERSISTENCE
+// ══════════════════════════════
+const STORAGE_KEY = 'pharmacare_meds_v1';
+const SALES_KEY   = 'pharmacare_sales_v1';
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(meds));
+    localStorage.setItem(SALES_KEY,   JSON.stringify(sales));
+  } catch(e) { console.warn('Storage error:', e); }
+}
+async function saveToFirebase(type, item) {
+  try {
+    if(type === 'med'  && window.fbSaveMed)  await window.fbSaveMed(item);
+    if(type === 'sale' && window.fbSaveSale) await window.fbSaveSale(item);
+  } catch(e) { console.warn('Firebase save error:', e); }
+}
+async function deleteFromFirebase(id) {
+  try {
+    if(window.fbDeleteMed) await window.fbDeleteMed(id);
+  } catch(e) { console.warn('Firebase delete error:', e); }
+}
+
+function loadData() {
+  try {
+    const savedMeds  = localStorage.getItem(STORAGE_KEY);
+    const savedSales = localStorage.getItem(SALES_KEY);
+    if(savedMeds)  { meds  = JSON.parse(savedMeds);  nextId  = Math.max(...meds.map(m=>m.id))  + 1; }
+    if(savedSales) { sales = JSON.parse(savedSales); nsid    = Math.max(...sales.map(s=>s.id)) + 1; }
+  } catch(e) { console.warn('Load error:', e); }
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+loadData(); // load saved data on startup
+document.getElementById('today-lbl').textContent=
+  TODAY.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+renderDash();
+</script>
+</body>
+</html>
